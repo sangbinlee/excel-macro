@@ -1,4 +1,4 @@
-'  할일목록 만들기
+
 Sub FillTodoList()
     Dim startValue As String
     Dim prefix As String
@@ -50,7 +50,10 @@ Sub FillTodoList()
     Next i
 End Sub
 
-' 되돌리기 없으므로 매크로 함수로 해야함 , 할일목록 삭제
+
+
+
+' 되돌리기 없으므로 매크로 함수로 해야함
 Sub ClearTodoList()
     Dim ws As Worksheet
     Set ws = ActiveSheet
@@ -70,27 +73,34 @@ Sub ClearTodoList()
     
 End Sub
 
-' 할일목록으로 시트 만들고 , 하이퍼링크 생성, 원본시트 복사 후 홈으로 가기 링크 만들기
+
+
+
+
+
+
+
+
 Sub CreateSheetsAndHyperlinks()
-    Dim wsIndex As Worksheet
+    Dim wsHome As Worksheet
     Dim cell As Range
     Dim newSheet As Worksheet
     Dim sheetName As String
-    Dim sourceSheet As Worksheet
+    Dim wsTemplate As Worksheet
     
     ' index 시트 지정
-    Set wsIndex = ThisWorkbook.Sheets("home")
-    Set sourceSheet = ThisWorkbook.Sheets("원본")
+    Set wsHome = ThisWorkbook.Sheets("home")
+    Set wsTemplate = ThisWorkbook.Sheets("원본")
     
     
     
     
     ' A열에서 마지막 데이터 행 찾기
-    lastRow = wsIndex.Cells(wsIndex.Rows.count, 1).End(xlUp).Row
+    lastRow = wsHome.Cells(wsHome.Rows.count, 1).End(xlUp).Row
     
     
     ' A2 ~ A31 반복
-    For Each cell In wsIndex.Range("A2:A" & lastRow)
+    For Each cell In wsHome.Range("A2:A" & lastRow)
         sheetName = Trim(cell.Value)
         
         If sheetName <> "" Then
@@ -101,13 +111,16 @@ Sub CreateSheetsAndHyperlinks()
             
             ' 없으면 새 시트 생성
             If newSheet Is Nothing Then
-                sourceSheet.Copy After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.count)
+            
+                ' 원본 시트 복사
+                wsTemplate.Copy After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.count)
                 Set newSheet = ThisWorkbook.Sheets(ThisWorkbook.Sheets.count)
+                 ' 새 시트 이름 지정
                 newSheet.Name = sheetName
             End If
             
             ' index 시트의 셀에 새 시트로 이동하는 하이퍼링크 추가
-            wsIndex.Hyperlinks.Add Anchor:=cell, _
+            wsHome.Hyperlinks.Add Anchor:=cell, _
                 Address:="", _
                 SubAddress:="'" & sheetName & "'!A1", _
                 TextToDisplay:=sheetName
@@ -115,28 +128,37 @@ Sub CreateSheetsAndHyperlinks()
             ' 새 시트의 B2 셀에 index 시트의 해당 셀로 돌아가는 하이퍼링크 추가
             newSheet.Hyperlinks.Add Anchor:=newSheet.Range("B2"), _
                 Address:="", _
-                SubAddress:="'" & wsIndex.Name & "'!" & cell.Address, _
+                SubAddress:="'" & wsHome.Name & "'!" & cell.Address, _
                 TextToDisplay:="home"
+                
+                    
+            ' 새 시트의 C2 셀에 Home 시트 B열 값 넣기
+            newSheet.Range("C2").Value = wsHome.Cells(cell.Row, 2).Value
+            
         End If
         
         Set newSheet = Nothing
     Next cell
 End Sub
 
+
+
+
+
 '시트의 하이퍼링크와 생성된 시트가 모두 제거
 Sub DeleteSheetsAndHyperlinks()
-    Dim wsIndex As Worksheet
+    Dim wsHome As Worksheet
     Dim cell As Range
     Dim sheetName As String
     Dim ws As Worksheet
     
     ' index 시트 지정
-    Set wsIndex = ThisWorkbook.Sheets("home")
+    Set wsHome = ThisWorkbook.Sheets("home")
     ' A열에서 마지막 데이터 행 찾기
-    lastRow = wsIndex.Cells(wsIndex.Rows.count, 1).End(xlUp).Row
+    lastRow = wsHome.Cells(wsHome.Rows.count, 1).End(xlUp).Row
     
     ' 1. index 시트의 A2~A31 범위 하이퍼링크 삭제
-    For Each cell In wsIndex.Range("A2:A" & lastRow)
+    For Each cell In wsHome.Range("A2:A" & lastRow)
         If cell.Hyperlinks.count > 0 Then
             cell.Hyperlinks.Delete
         End If
@@ -144,7 +166,7 @@ Sub DeleteSheetsAndHyperlinks()
     
     ' 2. index 시트의 A2~A31에 적힌 이름의 시트 삭제
     Application.DisplayAlerts = False ' 삭제 확인 메시지 숨기기
-    For Each cell In wsIndex.Range("A2:A" & lastRow)
+    For Each cell In wsHome.Range("A2:A" & lastRow)
         sheetName = Trim(cell.Value)
         If sheetName <> "" Then
             On Error Resume Next
@@ -157,5 +179,13 @@ Sub DeleteSheetsAndHyperlinks()
         End If
     Next cell
     Application.DisplayAlerts = True
+    
+    
+    
+    ' A열과 B열 삭제
+    wsHome.Columns("A:B").Delete
+    
+    
+    
 End Sub
 
