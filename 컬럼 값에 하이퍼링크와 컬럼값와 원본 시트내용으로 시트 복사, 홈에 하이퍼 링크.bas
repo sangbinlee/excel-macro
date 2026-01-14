@@ -1,4 +1,4 @@
-
+'  할일목록 만들기
 Sub FillTodoList()
     Dim startValue As String
     Dim prefix As String
@@ -50,10 +50,7 @@ Sub FillTodoList()
     Next i
 End Sub
 
-
-
-
-' 되돌리기 없으므로 매크로 함수로 해야함
+' 되돌리기 없으므로 매크로 함수로 해야함 , 할일목록 삭제
 Sub ClearTodoList()
     Dim ws As Worksheet
     Set ws = ActiveSheet
@@ -73,14 +70,7 @@ Sub ClearTodoList()
     
 End Sub
 
-
-
-
-
-
-
-
-
+' 할일목록으로 시트 만들고 , 하이퍼링크 생성, 원본시트 복사 후 홈으로 가기 링크 만들기
 Sub CreateSheetsAndHyperlinks()
     Dim wsIndex As Worksheet
     Dim cell As Range
@@ -132,10 +122,6 @@ Sub CreateSheetsAndHyperlinks()
         Set newSheet = Nothing
     Next cell
 End Sub
-
-
-
-
 
 '시트의 하이퍼링크와 생성된 시트가 모두 제거
 Sub DeleteSheetsAndHyperlinks()
